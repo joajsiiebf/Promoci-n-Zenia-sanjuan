@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Estética Zenia Sanjuan</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000;
+      color: #d4af37;
+      text-align: center;
+      padding: 40px 20px;
+      background-image: linear-gradient(160deg, #0a0a0a, #1c1c1c);
+    }
+
+    h1 {
+      font-size: 2.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #ffd700;
+      text-shadow: 0 0 15px #ffd70055;
+    }
+
+    p {
+      color: #e8c372;
+      font-size: 1em;
+    }
+
+    .flecha {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 30px solid #ffd700;
+      margin: 0 auto;
+    }
+
+    .ruleta-container {
+      width: 320px;
+      height: 320px;
+      margin: 40px auto;
+      position: relative;
+    }
+
+    .ruleta {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      overflow: hidden;
+      transition: transform 4s ease-out;
+      transform: rotate(0deg);
+      background: radial-gradient(circle, #1b1b1b 35%, #000 100%);
+      box-shadow: 0 0 25px #d4af37aa, inset 0 0 15px #000;
+    }
+
+    .segmento {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      left: 50%;
+      top: 50%;
+      transform-origin: 0% 0%;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffd700;
+      text-shadow: 0 0 5px #000;
+    }
+
+    .segmento::after {
+      content: "";
+      position: absolute;
+      width: 2px;
+      height: 100%;
+      background-color: #d4af37;
+      top: 0;
+      left: 0;
+    }
+
+    button {
+      background: linear-gradient(145deg, #f9d976, #f39f19);
+      color: #000;
+      border: none;
+      padding: 14px 28px;
+      font-size: 1em;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px #f0c04080;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #ffd700aa;
+    }
+
+    #resultado {
+      margin-top: 20px;
+      font-size: 1.1em;
+      color: #ffe680;
+    }
+
+    a button {
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎉 Estética Zenia Sanjuan 🎉</h1>
+  <p>¡Gira la ruleta y gana un descuento especial en tu próxima cita!</p>
+
+  <div class="flecha"></div>
+
+  <div class="ruleta-container">
+    <div class="ruleta" id="ruleta"></div>
+  </div>
+
+  <button id="botonGirar" onclick="girarRuleta()">🎡 Girar</button>
+
+  <div id="resultado"></div>
+
+  <script>
+    const descuentos = [
+      { valor: '15%', probabilidad: 0.3 },
+      { valor: '25%', probabilidad: 0.25 },
+      { valor: '30%', probabilidad: 0.2 },
+      { valor: '40%', probabilidad: 0.15 },
+      { valor: '50%', probabilidad: 0.07 },
+      { valor: '55%', probabilidad: 0.03 }
+    ];
+
+    const ruleta = document.getElementById('ruleta');
+    const resultadoDiv = document.getElementById("resultado");
+    const botonGirar = document.getElementById("botonGirar");
+    const total = descuentos.length;
+
+    descuentos.forEach((item, i) => {
+      const angle = 360 / total;
+      const seg = document.createElement('div');
+      seg.className = 'segmento';
+      seg.style.transform = `rotate(${i * angle}deg) skewY(${90 - angle}deg)`;
+
+      const text = document.createElement('div');
+      text.style.transform = `skewY(-${90 - angle}deg) rotate(${angle / 2}deg)`;
+      text.style.marginLeft = "30px";
+      text.innerText = item.valor;
+
+      seg.appendChild(text);
+      ruleta.appendChild(seg);
+    });
+
+    if (localStorage.getItem("yaGiro")) {
+      botonGirar.disabled = true;
+      botonGirar.innerText = "Ya giraste";
+      resultadoDiv.innerHTML = `🎁 Ya reclamaste tu descuento. <br><a href="https://wa.me/573005230959" target="_blank"><button>Habla con nosotros</button></a>`;
+    }
+
+    function girarRuleta() {
+      if (localStorage.getItem("yaGiro")) {
+        alert("Solo puedes girar una vez.");
+        return;
+      }
+
+      const random = Math.random();
+      let acumulado = 0;
+      let seleccionado;
+
+      for (let i = 0; i < descuentos.length; i++) {
+        acumulado += descuentos[i].probabilidad;
+        if (random <= acumulado) {
+          seleccionado = descuentos[i];
+          break;
+        }
+      }
+
+      const index = descuentos.findIndex(d => d.valor === seleccionado.valor);
+      const gradosPorSegmento = 360 / descuentos.length;
+      const rotacion = 360 * 5 + (index * gradosPorSegmento) + gradosPorSegmento / 2;
+
+      ruleta.style.transform = `rotate(-${rotacion}deg)`;
+
+      setTimeout(() => {
+        localStorage.setItem("yaGiro", true);
+        botonGirar.disabled = true;
+        botonGirar.innerText = "Ya giraste";
+        resultadoDiv.innerHTML = `🎉 ¡Felicidades! Obtuviste un <strong>${seleccionado.valor}</strong> de descuento.<br><br>
+          <a href="https://wa.me/573005230959?text=Hola,%20gané%20un%20${seleccionado.valor}%20de%20descuento%20en%20la%20ruleta!" target="_blank">
+            <button>Reclamar por WhatsApp</button>
+          </a>`;
+      }, 4200);
+    }
+  </script>
+
+</body>
+</html>
